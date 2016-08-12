@@ -7,15 +7,84 @@
   <xacro:property name="PI" value="3.1415926535897931"/>
 
   <!-- Body properties -->
-  <xacro:property name="body_mass"   value="2.9"/>
-  <xacro:property name="body_length" value="0.4"/>
-  <xacro:property name="body_width"  value="0.2"/>
-  <xacro:property name="body_heigth" value="0.08"/>
+  <xacro:property name="body_top_mass"    value="25"/>
+  <xacro:property name="body_bottom_mass" value="50"/>
+  <xacro:property name="body_radius"      value="0.13"/>
+  <xacro:property name="body_height"      value="0.7"/>
+  <xacro:property name="body_width"       value="0.7"/>
+  <xacro:property name="body_length"      value="1.5"/>
+  <xacro:property name="X_cog"            value="-0.55"/>
 
-  <xacro:property name="thr2_y" value="0.278"/>
+
+  <!-- Plugin list -->
+  <gazebo>
+    <!-- Gazebo plugin listens to the body-->
+    <plugin name="freefloating_gazebo_control" filename="libfreefloating_gazebo_control.so">
+
+      <switchService>switch</switchService>
+      <updateRate>100</updateRate>
+      <link>base_link</link>
+
+      <!-- for each thruster, give the map to XYZ+RPY and the maximum effort -->
+      <thruster>
+        <map>-1 0 0 0 0 ${-body_width/2}</map>
+        <effort>30</effort>
+      </thruster>
+      <thruster>
+        <map>-1 0 0 0 0 ${body_width/2}</map>
+        <effort>30</effort>
+      </thruster>
+      <thruster>
+        <map>0 1 0 0 0 0</map>
+        <effort>30</effort>
+      </thruster>
+      <thruster>
+        <map>0 0 -1 0 ${2*X_cog} 0</map>
+        <effort>30</effort>
+      </thruster>
+      <thruster>
+        <map>0 0 -1 0 ${-2*X_cog} 0</map>
+        <effort>30</effort>
+      </thruster>
+    </plugin>
+  </gazebo>
+
+
+  <link name="base_link">
+    <visual>
+      <origin rpy="${-PI/2} 0 ${PI}" xyz="-0.2 0 0.75"/>
+      <geometry>
+        <mesh filename="package://freefloating_test/objects/g500_March11.stl"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <origin xyz="${X_cog} 0 ${body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)}" rpy="0 0 0"/>
+      <mass value="${2*body_top_mass+body_bottom_mass}"/>
+      <inertia
+        ixx="${2*body_top_mass*(body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)*body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)+body_width*body_width/4)+body_bottom_mass*(body_height-body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass))*(body_height-body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass))+body_top_mass*body_radius*body_radius+(body_bottom_mass*body_radius*body_radius)/2}"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="${2*body_top_mass*body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)*body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)+body_bottom_mass*(body_height-body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass))*(body_height-body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass))+2*body_top_mass*(body_radius*body_radius/4+body_length*body_length/12)+body_bottom_mass*(body_radius*body_radius/4+body_length*body_length/12)}"
+        iyz="${-body_top_mass*body_width*body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)}"
+        izz="${(body_top_mass*body_width*body_width)/2+2*body_top_mass*(body_radius*body_radius/4+body_length*body_length/12)+body_bottom_mass*(body_radius*body_radius/4+body_length*body_length/12)}"/>
+    </inertial>
+
+    <buoyancy>
+      <compensation>1.01</compensation>
+      <origin xyz= "${X_cog} 0 ${body_height*body_bottom_mass/(2*body_top_mass+body_bottom_mass)/2}"/>
+      <limit radius=".5"/>
+      <damping xyz="60 100 100" rpy="20 50 50"/>
+    </buoyancy>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
 
   <!-- Thruster link -->
-  <xacro:macro name="thruster_dummy_link" params="name xyz rpy">
+  <xacro:macro name="thruster_link" params="name xyz rpy">
     <joint name="${name}" type="fixed">
       <parent link="base_link"/>
       <child link="${name}"/>
@@ -29,17 +98,6 @@
             <cylinder length=".02" radius=".045"/>
         </geometry>
       </visual>
-
-      <inertial>
-        <mass value=".05"/>
-        <inertia
-            ixx=".1"
-            ixy="0.0"
-            ixz="0.0"
-            iyy=".1"
-            iyz="0.0"
-            izz=".1"/>
-        </inertial>
     </link>
 
     <gazebo reference="${name}">
@@ -47,69 +105,7 @@
     </gazebo>
   </xacro:macro>
 
-  <!-- Plugin list -->
-  <gazebo>
-    <!-- Gazebo plugin listens to the body-->
-    <plugin name="freefloating_gazebo_control" filename="libfreefloating_gazebo_control.so">
-
-      <switchService>switch</switchService>
-      <updateRate>100</updateRate>
-      <link>base_link</link>
-
-      <!-- for each thruster, give the map to XYZ+RPY and the maximum effort -->
-      <thruster>
-          <effort>30</effort>
-          <name>thr1</name>
-          <map>0 0 1 0 ${body_length/2} 0</map>
-      </thruster>
-      <thruster>
-          <effort>30</effort>
-          <name>thr_r</name>
-          <map>1 0 0 0 0 ${body_width/2}</map>
-      </thruster>
-      <thruster>
-          <effort>30</effort>
-          <name>thr_l</name>
-          <map>1 0 0 0 0 ${-body_width/2}</map>
-      </thruster>
-
-    </plugin>
-  </gazebo>
-
-  <link name="base_link">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="${body_length} ${body_width} ${body_heigth}"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0 0 0 1"/>
-      </material>
-    </visual>
-
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 ${-PI/2} 0"/>
-      <mass value="${body_mass}"/>
-      <inertia
-        ixx="${0.083*body_mass*(body_width*body_width+body_heigth*body_heigth)}"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="${0.083*body_mass*(body_length*body_length+body_heigth*body_heigth)}"
-        iyz="0.0"
-        izz="${0.083*body_mass*(body_length*body_length+body_width*body_width)}"/>
-    </inertial>
-
-    <buoyancy>
-      <compensation>1.01</compensation>
-      <origin xyz= "0 0 0"/>
-      <limit radius="${body_heigth}"/>
-      <damping xyz="6 100 100" rpy="20 50 50"/>
-    </buoyancy>
-  </link>
 
   <!-- Dummy links to display wrench in Rviz, autogenerated -->
-  <xacro:thruster_dummy_link name="thr1" xyz="-0.27 0.0 0.0" rpy="0.0 0.0 0.0"/>
-  <xacro:thruster_dummy_link name="thr_r" xyz="0.21 0.05 0.0" rpy="0.0 ${PI/2} 0.0"/>
-  <xacro:thruster_dummy_link name="thr_l" xyz="0.21 -0.05 0.0" rpy="0.0 ${PI/2} 0.0"/>
+  <!-- xacro:thruster_link name="thr0" xyz="0.0 0.0 0.0" rpy="${PI/2} 0.0 ${-body_width/2}"/-->
 </robot>

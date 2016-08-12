@@ -1,0 +1,6 @@
+controllers:
+    config:
+        body:
+            control_type: thruster  # cannot be wrench because of vectored thrusters
+            state: state
+            dynamic_reconfigure: False
