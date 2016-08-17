@@ -8,13 +8,13 @@ std::vector<int> thruster_use_percent;
  */
 float calculateBatteryCondition()
 {
-  float k = 0.0001; // коэффициент пропорциональности
+  const float k = 0.0001; // коэффициент пропорциональности
   float p = 0; // текущая относительная мощность двигателя
 
-  for(unsigned int i = 0; i < thruster_use_percent.size(); i++)
+  for(unsigned int i = 0; i < thruster_use_percent.size() && !thruster_use_percent.empty(); i++)
     p += (float) thruster_use_percent[i]/100;
 
-  return k * p / thruster_use_percent.size();
+  return thruster_use_percent.empty() ? 0 : k * p / thruster_use_percent.size();
 }
 
 /*
@@ -25,15 +25,18 @@ void thrusterUseCallback(const sensor_msgs::JointStateConstPtr & _msg)
 {
   unsigned int i;
 
-  if(thruster_use_percent.empty())
+  if(!_msg->position.empty())
   {
-    for(i = 0; i < _msg->position.size(); i++)
-      thruster_use_percent.push_back(_msg->position[i]);
-  }
-  else
-  {
-    for(i = 0; i < _msg->position.size(); i++)
-      thruster_use_percent[i] = _msg->position[i];
+    if(thruster_use_percent.empty())
+    {
+      for(i = 0; i < _msg->position.size(); i++)
+        thruster_use_percent.push_back(_msg->position[i]);
+    }
+    else
+    {
+      for(i = 0; i < _msg->position.size(); i++)
+        thruster_use_percent[i] = _msg->position[i];
+    }
   }
 }
 
@@ -45,12 +48,23 @@ int main(int argc, char** argv)
   ros::Subscriber thruster_use_subscriber = rosnode.subscribe("/my_robot/thruster_use", 1, thrusterUseCallback);
 
   ros::Rate loop_rate(1); // 1 hz
+
+  float battery_filling = 0;
+  unsigned int battery_percentage;
+
   while (ros::ok())
   {
-    ROS_INFO("I heard [%f]", calculateBatteryCondition());
+
+    if(battery_filling < 1)
+      battery_filling += calculateBatteryCondition();
+    else
+      battery_filling = 1;
+
+    battery_percentage = (int) ((1.0 - battery_filling) * 100);
+
+    ROS_INFO("Battery charge: [%i%%]", battery_percentage);
     /*
-     * Сделать пересчет заряда батареи в процентах
-     * и постить в battery_state топик
+     * постить в battery_state топик
      * http://docs.ros.org/jade/api/sensor_msgs/html/msg/BatteryState.html
      */
 
