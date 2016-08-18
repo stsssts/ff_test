@@ -1,6 +1,18 @@
 controllers:
-    config:
-        body:
-            control_type: thruster  # cannot be wrench because of vectored thrusters
-            state: state
-            dynamic_reconfigure: False
+  config:
+    body:
+      control_type: thruster  # cannot be wrench because of vectored thrusters
+      state: state
+      dynamic_reconfigure: False
+    joints:
+      state: joint_states
+      setpoint: joint_setpoint
+      command: joint_command
+      cascaded_position: False
+      dynamic_reconfigure: True
+  RightHand:
+    velocity: {p: 10, i: 1.0, d: 2.0}
+    position: {p: 10, i: 1.0, d: 2.0}
+  LeftHand:
+    velocity: {p: 10, i: 1.0, d: 2.0}
+    position: {p: 10, i: 1.0, d: 2.0}

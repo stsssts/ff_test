@@ -13,10 +13,22 @@
     <!-- spawn in Gazebo with GUI -->
     <group ns="my_robot">
         <param name="robot_description" command="$(find xacro)/xacro --inorder $(find freefloating_test)/urdf/robot.xacro"/>
-        <node name="spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model my_robot -param robot_description -x 3 -y 6.5 -z -10 -R 3.1415 -P 0 -Y 0"/>
+        <node name="spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model my_robot -param robot_description -x 0 -y 0 -z 0 -R 3.14159 -P 0 -Y 0"/>
 
         <!-- Load controller configurations (vehicle and arm) from YAML file to parameter server -->
         <rosparam file="$(find freefloating_test)/config/robot_manual.yaml" command="load"/>
+
+
+        <!-- Launch low-level PID control for arm
+             body control will not activate as we expect direct thruster control
+        <node name="pid_control" pkg="freefloating_gazebo" type="pid_control" output="screen" respawn="true"/>
+       -->
+        <!-- Manual control of joints
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="true" if="$(arg gui)">
+        <param name="use_gui" value="True"/>
+        <remap from="joint_states" to="joint_setpoint" />
+        </node>
+-->
 
         <!-- Manual control of thruster efforts -->
         <group ns="thrusters">
@@ -27,6 +39,11 @@
                <remap from="joint_states" to="/my_robot/thruster_command" />
              </node>
         </group>
+    </group>
+
+    <group ns="mayak">
+      <param name="robot_description" command="$(find xacro)/xacro --inorder $(find freefloating_test)/urdf/mayak.xacro"/>
+      <node name="spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model mayak -param robot_description -x 0 -y -0.008 -z -0.93 -R 0 -P 0 -Y 0"/>
     </group>
 
     <!-- spawn terrain
