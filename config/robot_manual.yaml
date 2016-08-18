@@ -10,9 +10,18 @@ controllers:
       command: joint_command
       cascaded_position: False
       dynamic_reconfigure: True
-  RightHand:
-    velocity: {p: 10, i: 1.0, d: 2.0}
-    position: {p: 10, i: 1.0, d: 2.0}
-  LeftHand:
-    velocity: {p: 10, i: 1.0, d: 2.0}
-    position: {p: 10, i: 1.0, d: 2.0}
+  OpenHook_arm0:
+    velocity: {p: 1, i: 0.0, d: 2.0}
+    position: {p: 10, i: 0.1, d: 0.5}
+  OpenHook_arm1:
+    velocity: {p: 1, i: 0.0, d: 2.0}
+    position: {p: 10, i: 0.1, d: 0.5}
+  OpenHook_arm2:
+    velocity: {p: 1, i: 0.0, d: 2.0}
+    position: {p: 10, i: 0.1, d: 0.5}
+  OpenHook_arm3:
+    velocity: {p: 1, i: 0.0, d: 2.0}
+    position: {p: 10, i: 0.1, d: 0.5}
+  OpenHook_arm4:
+    velocity: {p: 1, i: 0.0, d: 2.0}
+    position: {p: 10, i: 0.1, d: 0.5}

@@ -85,4 +85,10 @@
 
   <!-- Include arm -->
   <xacro:include filename="arm.xacro"/>
+
+  <xacro:hook name="arm0" position="0.4"/>
+  <xacro:hook name="arm1" position="0.2"/>
+  <xacro:hook name="arm2" position="0.0"/>
+  <xacro:hook name="arm3" position="-0.2"/>
+  <xacro:hook name="arm4" position="-0.4"/>
 </robot>
