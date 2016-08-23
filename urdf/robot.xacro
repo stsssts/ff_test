@@ -47,6 +47,20 @@
         <effort>30</effort>
       </thruster>
     </plugin>
+
+
+    <!-- GPS Sensor -->
+    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>gps_position</topicName>
+      <velocityTopicName>gps_velocity</velocityTopicName>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+    </plugin>
   </gazebo>
 
 
@@ -78,9 +92,6 @@
     </buoyancy>
   </link>
 
-  <gazebo reference="base_link">
-    <material>Gazebo/Black</material>
-  </gazebo>
 
 
   <!-- Include arm -->
@@ -91,4 +102,6 @@
   <xacro:hook name="arm2" position="0.0"/>
   <xacro:hook name="arm3" position="-0.2"/>
   <xacro:hook name="arm4" position="-0.4"/>
+
+
 </robot>

@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
+#include "sensor_msgs/BatteryState.h"
 
 std::vector<int> thruster_use_percent;
 
@@ -10,7 +11,6 @@ float calculateBatteryCondition()
 {
   const float k = 0.0001; // коэффициент пропорциональности
   float p = 0; // текущая относительная мощность двигателя
-
   for(unsigned int i = 0; i < thruster_use_percent.size() && !thruster_use_percent.empty(); i++)
     p += (float) thruster_use_percent[i]/100;
 
@@ -46,27 +46,24 @@ int main(int argc, char** argv)
   ros::NodeHandle rosnode;
 
   ros::Subscriber thruster_use_subscriber = rosnode.subscribe("/my_robot/thruster_use", 1, thrusterUseCallback);
+  ros::Publisher battery_state_publisher = rosnode.advertise<sensor_msgs::BatteryState>("/my_robot/battery_state", 1);
 
   ros::Rate loop_rate(1); // 1 hz
 
-  float battery_filling = 0;
-  unsigned int battery_percentage;
+  float battery_filling = 1.0;
+  sensor_msgs::BatteryState battery_msg;
+  battery_msg.present = true;
 
   while (ros::ok())
   {
-
-    if(battery_filling < 1)
-      battery_filling += calculateBatteryCondition();
+    if(battery_filling > 0)
+      battery_filling -= calculateBatteryCondition();
     else
-      battery_filling = 1;
+      battery_filling = 0;
 
-    battery_percentage = (int) ((1.0 - battery_filling) * 100);
-
-    ROS_INFO("Battery charge: [%i%%]", battery_percentage);
-    /*
-     * постить в battery_state топик
-     * http://docs.ros.org/jade/api/sensor_msgs/html/msg/BatteryState.html
-     */
+    // Publish battery condition
+    battery_msg.percentage = battery_filling * 100;
+    battery_state_publisher.publish(battery_msg);
 
     ros::spinOnce();
     loop_rate.sleep();

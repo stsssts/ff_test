@@ -26,6 +26,9 @@
           <param name="use_gui" value="True"/>
           <remap from="joint_states" to="joint_setpoint" />
         </node>
+        
+        <!-- Control battery state -->
+        <node name="battery_state" pkg="freefloating_test" type="battery_state" respawn="true"/>
 
         <!-- Manual control of thruster efforts -->
         <group ns="thrusters">
@@ -45,8 +48,8 @@
       <node name="spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model mayak -param robot_description -x 0 -y -0.008 -z -0.93 -R 0 -P 0 -Y 0"/>
     </group>
 
-    <!-- spawn terrain
-    <param name="terrain_description" command="$(find xacro)/xacro $(find freefloating_gazebo_demo)/terrain/shipwreck/terrain.sdf"/>
-    <node name="terrain_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model terrain -param terrain_description -x 0 -y 0 -z 0 -R 0 -P 0 -Y 0"/> -->
+    <!-- spawn terrain -->
+    <param name="terrain_description" command="$(find xacro)/xacro $(find freefloating_test)/urdf/terrain.sdf"/>
+    <node name="terrain_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model terrain -param terrain_description -x 0 -y 0 -z -20 -R 0 -P 0 -Y 0"/>
 
 </launch>
