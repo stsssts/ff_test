@@ -5,6 +5,7 @@ project(freefloating_test)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  gazebo_ros
   std_msgs
   genmsg)
 
@@ -14,5 +15,6 @@ catkin_package()
 ## Build
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+## Battery state node
 add_executable(battery_state src/battery_state.cpp)
 target_link_libraries(battery_state ${catkin_LIBRARIES})
